@@ -1,5 +1,7 @@
 package com.theokanning.openai;
 
+import com.theokanning.openai.audio.TranscriptionResult;
+import com.theokanning.openai.audio.TranslationResult;
 import com.theokanning.openai.completion.CompletionRequest;
 import com.theokanning.openai.completion.CompletionResult;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
@@ -66,6 +68,8 @@ public interface OpenAiApi {
     @POST("/v1/engines/{engine_id}/embeddings")
     Single<EmbeddingResult> createEmbeddings(@Path("engine_id") String engineId, @Body EmbeddingRequest request);
 
+
+
     @GET("/v1/files")
     Single<OpenAiResponse<File>> listFiles();
 
@@ -119,4 +123,10 @@ public interface OpenAiApi {
     @Deprecated
     @GET("/v1/engines/{engine_id}")
     Single<Engine> getEngine(@Path("engine_id") String engineId);
+
+    @POST("/v1/audio/transcriptions")
+    Single<TranscriptionResult> createTranscription(@Body RequestBody requestBody);
+
+    @POST("/v1/audio/translations")
+    Single<TranslationResult> createTranslation(@Body RequestBody requestBody);
 }

@@ -8,6 +8,10 @@ import com.theokanning.openai.DeleteResult;
 import com.theokanning.openai.OpenAiApi;
 import com.theokanning.openai.OpenAiError;
 import com.theokanning.openai.OpenAiHttpException;
+import com.theokanning.openai.audio.TranscriptionRequest;
+import com.theokanning.openai.audio.TranscriptionResult;
+import com.theokanning.openai.audio.TranslationRequest;
+import com.theokanning.openai.audio.TranslationResult;
 import com.theokanning.openai.completion.CompletionChunk;
 import com.theokanning.openai.completion.CompletionRequest;
 import com.theokanning.openai.completion.CompletionResult;
@@ -29,14 +33,13 @@ import com.theokanning.openai.image.ImageResult;
 import com.theokanning.openai.model.Model;
 import com.theokanning.openai.moderation.ModerationRequest;
 import com.theokanning.openai.moderation.ModerationResult;
-
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
 import okhttp3.*;
+import retrofit2.Call;
 import retrofit2.HttpException;
 import retrofit2.Retrofit;
-import retrofit2.Call;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -141,6 +144,67 @@ public class OpenAiService {
 
     public EmbeddingResult createEmbeddings(EmbeddingRequest request) {
         return execute(api.createEmbeddings(request));
+    }
+
+
+    public TranscriptionResult createTranscription(TranscriptionRequest request, String filePath) {
+        java.io.File file = new java.io.File(filePath);
+        return createTranscription(request, file);
+    }
+
+    public TranscriptionResult createTranscription(TranscriptionRequest request, java.io.File file) {
+        RequestBody fileBody = RequestBody.create(MediaType.parse("file"), file);
+
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MediaType.get("multipart/form-data"))
+                .addFormDataPart("file", "file", fileBody)
+                .addFormDataPart("model", request.getModel());
+
+        if (request.getPrompt() != null) {
+            builder.addFormDataPart("prompt", request.getPrompt());
+        }
+
+        if (request.getResponseFormat() != null) {
+            builder.addFormDataPart("response_format", request.getResponseFormat());
+        }
+
+        if (request.getLanguage() != null) {
+            builder.addFormDataPart("language", request.getLanguage());
+        }
+
+        if (request.getTemperature() != null) {
+            builder.addFormDataPart("temperature", request.getTemperature().toString());
+        }
+
+        return execute(api.createTranscription(builder.build()));
+    }
+
+    public TranslationResult createTranslation(TranslationRequest request, String filePath) {
+        java.io.File file = new java.io.File(filePath);
+        return createTranslation(request, file);
+    }
+
+    public TranslationResult createTranslation(TranslationRequest request, java.io.File file) {
+        RequestBody fileBody = RequestBody.create(MediaType.parse("file"), file);
+
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MediaType.get("multipart/form-data"))
+                .addFormDataPart("file", "file", fileBody)
+                .addFormDataPart("model", request.getModel());
+
+        if (request.getPrompt() != null) {
+            builder.addFormDataPart("prompt", request.getPrompt());
+        }
+
+        if (request.getResponseFormat() != null) {
+            builder.addFormDataPart("response_format", request.getResponseFormat());
+        }
+
+        if (request.getTemperature() != null) {
+            builder.addFormDataPart("temperature", request.getTemperature().toString());
+        }
+
+        return execute(api.createTranslation(builder.build()));
     }
 
     public List<File> listFiles() {
